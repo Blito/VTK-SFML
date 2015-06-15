@@ -32,6 +32,41 @@ constexpr char * fontPath = "arial.ttf";
 
 int main()
 {
+	// ########### SETUP SFML ########### 
+    sf::RenderWindow window;
+    window.create(sf::VideoMode(sfmlWidth, sfmlHeight), "SFML Window");
+
+    // Create texture buffer
+    texture_raw = new unsigned char[textureWidth * textureHeight * 4]; // RGBA
+    for (unsigned int i = 0; i < textureWidth * textureHeight * 4; i+=4)
+    {
+    	texture_raw[i] = 255; // red square
+    	texture_raw[i+3] = 255;
+    }
+
+    // Create texture
+    sf::Texture texture;
+    texture.create(textureWidth, textureHeight);
+    texture.update(texture_raw);
+
+    // Create sprite
+    sf::Sprite sprite;
+    sprite.setTexture(texture);
+    unsigned int x = 50;
+    unsigned int y = 100;
+    sprite.setPosition(x, y);
+
+    // Create FPS output
+    sf::Text fpsOutput;
+    sf::Font font;
+    if (!font.loadFromFile(fontPath))
+        return -1;
+    fpsOutput.setFont(font);
+    fpsOutput.setCharacterSize(24);
+    fpsOutput.setColor(sf::Color::Red);
+    fpsOutput.setPosition(0, sfmlHeight-30);
+	// ########### END SETUP SFML ###########
+
 	// ########### SETUP VTK ###########
 	auto renderer = vtkRenderer::New();
     renderer->SetBackground(.05,.1,.15);
@@ -67,39 +102,6 @@ int main()
     renderer->ResetCamera();
     // ########### END SETUP VTK ###########
 
-	// ########### SETUP SFML ########### 
-    sf::RenderWindow window;
-    window.create(sf::VideoMode(1,1), "SFML Window");
-    window.setSize(sf::Vector2u(sfmlWidth, sfmlHeight));
-
-    // Create texture buffer
-    texture_raw = new unsigned char[textureWidth * textureHeight * 4]; // RGBA
-    for (unsigned int i = 0; i < textureWidth * textureHeight * 4; i++)
-    	texture_raw[i] = 255; // red square
-
-    // Create texture
-    sf::Texture texture;
-    texture.create(textureWidth, textureHeight);
-    texture.update(texture_raw);
-
-    // Create sprite
-    sf::Sprite sprite;
-    sprite.setTexture(texture);
-    unsigned int x = 50;
-    unsigned int y = 100;
-    sprite.setPosition(x, y);
-
-    // Create FPS output
-    sf::Text fpsOutput;
-    sf::Font font;
-    if (!font.loadFromFile(fontPath))
-        return -1;
-    fpsOutput.setFont(font);
-    fpsOutput.setCharacterSize(24);
-    fpsOutput.setColor(sf::Color::Red);
-    fpsOutput.setPosition(0, sfmlHeight-30);
-	// ########### END SETUP SFML ###########
-
     auto startTime = std::chrono::high_resolution_clock::now();
     std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
     while (true)
@@ -120,7 +122,7 @@ int main()
 
 	    // Update FPS
 	    endTime = std::chrono::high_resolution_clock::now();
-	    double fps = (double)1000/std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime).count();
+	    double fps = (double)1000.0/std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime).count();
 	    std::ostringstream strs;
 	    strs << "FPS: " << fps;
 	    std::string str = strs.str();
@@ -128,11 +130,12 @@ int main()
 	    startTime = std::chrono::high_resolution_clock::now();
 
 	    // Update square
-	    //sprite.setPosition(x, y);
+	    sprite.setPosition(x, y);
 	    x < sfmlWidth - textureWidth ? x++ : x = 0;
 	    y < sfmlHeight - textureHeight ? y++ : y = 0;
 
 	    window.clear();
+	    window.draw(fpsOutput);
     	window.draw(sprite);
     	window.display();
 		// ########### END UPDATE SFML ###########
