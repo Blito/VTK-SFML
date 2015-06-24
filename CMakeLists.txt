@@ -10,6 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
 add_executable(vtk_sfml main.cpp)
 
 # VTK includes
+set(VTK_DIR "lib/VTK/build")
 find_package(VTK REQUIRED)
 if (VTK_FOUND)
   include(${VTK_USE_FILE})
@@ -17,6 +18,8 @@ if (VTK_FOUND)
 endif()
 
 # SFML 2.2
+set(SFML_ROOT "C:/Simeco/simeco/lib/SFML-2.2/build")
+set(SFML_INCLUDE_DIR "C:/Simeco/simeco/lib/SFML-2.2/include")
 find_package(SFML 2 REQUIRED system window graphics)
 if(SFML_FOUND)
   include_directories(${SFML_INCLUDE_DIR})
