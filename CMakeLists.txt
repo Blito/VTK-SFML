@@ -16,12 +16,3 @@ if (VTK_FOUND)
   include(${VTK_USE_FILE})
   target_link_libraries(vtk_sfml ${VTK_LIBRARIES})
 endif()
-
-# SFML 2.2
-set(SFML_ROOT "C:/Simeco/simeco/lib/SFML-2.2/build")
-set(SFML_INCLUDE_DIR "C:/Simeco/simeco/lib/SFML-2.2/include")
-find_package(SFML 2 REQUIRED system window graphics)
-if(SFML_FOUND)
-  include_directories(${SFML_INCLUDE_DIR})
-  target_link_libraries(vtk_sfml ${SFML_LIBRARIES})
-endif()
