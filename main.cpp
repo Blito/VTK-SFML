@@ -11,6 +11,8 @@
 #include <vtkSmartPointer.h>
 #include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkInteractorStyleTrackballCamera.h>
 
 // SFML INCLUDES
 #include <SFML/Graphics.hpp>
@@ -107,6 +109,9 @@ void vtk()
     renWin->AddRenderer(renderer);
     renWin->SetSize(600,600);
 
+    auto renderWindowInteractor = vtkRenderWindowInteractor::New();
+    renderWindowInteractor->SetRenderWindow(renWin);
+
     // Create a camera
     auto camera = vtkSmartPointer<vtkCamera>::New();
     camera->SetPosition(50, 50, 100);
@@ -131,7 +136,31 @@ void vtk()
                              planeHeight, 0);
 
     renderer->AddActor(texturedPlane);
+
+    // Create a plane
+    auto texturedPlane2 = vtkActor::New();
+    auto plane2 = vtkSmartPointer<vtkPlaneSource>::New();
+
+    plane2->SetOrigin(0, planeHeight, 0);
+    plane2->SetPoint1(planeWidth, 0, planeHeight);
+    plane2->SetPoint2(0, 0, 0);
+
+    auto planeMapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
+    planeMapper2->SetInputConnection(plane2->GetOutputPort());
+
+    texturedPlane2->SetMapper(planeMapper2);
+
+    texturedPlane2->SetOrigin(planeWidth / 2,
+                             planeHeight, 0);
+
+    renderer->AddActor(texturedPlane2);
+
     renderer->ResetCamera();
+
+    auto style = vtkInteractorStyleTrackballCamera::New(); 
+    renderWindowInteractor->SetInteractorStyle( style );
+
+    renderWindowInteractor->Start();
 
     // Render
     while(true)
