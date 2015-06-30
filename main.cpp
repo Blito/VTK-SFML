@@ -13,6 +13,7 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkCommand.h>
 
 // SFML INCLUDES
 #include <SFML/Graphics.hpp>
@@ -25,6 +26,31 @@ constexpr float planeHeight = 100.0f;
 float rot_x = 0;
 float rot_y = 0;
 float rot_z = 0;
+vtkRenderWindowInteractor * renderWindowInteractor;
+vtkActor * texturedPlane;
+vtkRenderWindow * renWin;
+
+class CommandSubclass2 : public vtkCommand
+{
+  public:
+    vtkTypeMacro(CommandSubclass2, vtkCommand);
+
+    static CommandSubclass2 *New()
+    {
+        return new CommandSubclass2;
+    }
+
+    void Execute(vtkObject *vtkNotUsed(caller), unsigned long vtkNotUsed(eventId), 
+                    void *vtkNotUsed(callData))
+    {
+        texturedPlane->SetOrientation(0,0,0);
+        texturedPlane->RotateY(rot_x++);
+        texturedPlane->RotateX(rot_y--);
+        texturedPlane->RotateZ(rot_z++);
+        //renderWindowInteractor->ExitCallback();
+        renWin->Render();
+    }
+};
 
 // SFML variables
 constexpr unsigned int sfmlWidth = 800;
@@ -105,12 +131,17 @@ void vtk()
     auto renderer = vtkRenderer::New();
 
     // Create render window
-    auto renWin = vtkRenderWindow::New();
+    renWin = vtkRenderWindow::New();
     renWin->AddRenderer(renderer);
     renWin->SetSize(600,600);
 
-    auto renderWindowInteractor = vtkRenderWindowInteractor::New();
+    renderWindowInteractor = vtkRenderWindowInteractor::New();
     renderWindowInteractor->SetRenderWindow(renWin);
+    renderWindowInteractor->Initialize();
+    renderWindowInteractor->CreateRepeatingTimer(1);
+
+    vtkSmartPointer<CommandSubclass2> timerCallback =  vtkSmartPointer<CommandSubclass2>::New();
+    renderWindowInteractor->AddObserver ( vtkCommand::TimerEvent, timerCallback );
 
     // Create a camera
     auto camera = vtkSmartPointer<vtkCamera>::New();
@@ -120,7 +151,7 @@ void vtk()
     renderer->SetBackground(.05,.1,.15);
 
     // Create a plane
-    auto texturedPlane = vtkActor::New();
+    texturedPlane = vtkActor::New();
     auto plane = vtkSmartPointer<vtkPlaneSource>::New();
 
     plane->SetOrigin(0, planeHeight, 0);
@@ -157,20 +188,14 @@ void vtk()
 
     renderer->ResetCamera();
 
-    auto style = vtkInteractorStyleTrackballCamera::New(); 
-    renderWindowInteractor->SetInteractorStyle( style );
+
 
     renderWindowInteractor->Start();
 
     // Render
     while(true)
     {
-        texturedPlane->SetOrientation(0,0,0);
-        texturedPlane->RotateY(rot_x++);
-        texturedPlane->RotateX(rot_y--);
-        texturedPlane->RotateZ(rot_z++);
             
-        renWin->Render();
     }
 }
 
